@@ -1,0 +1,477 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Blind 29 ($B29) — The Reveal Protocol</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Special+Elite&family=IBM+Plex+Mono:wght@400;500;600;700&family=Source+Serif+4:opsz,wght@8..60,400;8..60,500;8..60,600&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --ink:#111110;
+    --ink-2:#181816;
+    --paper:#E9E4D8;
+    --paper-dim:#C9C2AE;
+    --redact:#0A0A0A;
+    --wax:#A5283A;
+    --wax-bright:#C4394C;
+    --steel:#7C93A3;
+    --brass:#AE8A52;
+    --line: rgba(233,228,216,0.14);
+  }
+  *{box-sizing:border-box; margin:0; padding:0;}
+  html{scroll-behavior:smooth;}
+  body{
+    background:var(--ink);
+    color:var(--paper);
+    font-family:'Source Serif 4', serif;
+    line-height:1.65;
+    overflow-x:hidden;
+  }
+  h1,h2,h3,.display{
+    font-family:'Special Elite', monospace;
+    font-weight:400;
+    color:var(--paper);
+    letter-spacing:0.01em;
+  }
+  .mono{ font-family:'IBM Plex Mono', monospace; }
+  a{ color:inherit; text-decoration:none; }
+  .wrap{ max-width:1140px; margin:0 auto; padding:0 32px; }
+  section{ padding:120px 0; position:relative; }
+  .eyebrow{
+    font-family:'IBM Plex Mono', monospace;
+    font-size:12px;
+    letter-spacing:0.2em;
+    text-transform:uppercase;
+    color:var(--steel);
+    display:flex;
+    align-items:center;
+    gap:12px;
+    margin-bottom:20px;
+  }
+  .eyebrow::before{ content:"§"; color:var(--wax-bright); font-family:'IBM Plex Mono',monospace; }
+
+  .redact{
+    background:var(--redact);
+    color:var(--redact);
+    padding:0 6px;
+    border-radius:2px;
+    user-select:none;
+  }
+  .stamp{
+    display:inline-block;
+    border:2px solid var(--wax-bright);
+    color:var(--wax-bright);
+    font-family:'IBM Plex Mono',monospace;
+    font-size:11px;
+    letter-spacing:0.16em;
+    text-transform:uppercase;
+    padding:5px 12px;
+    transform:rotate(-3deg);
+  }
+
+  /* ---------- NAV ---------- */
+  nav{
+    position:fixed; top:0; left:0; right:0; z-index:50;
+    background:linear-gradient(to bottom, rgba(17,17,16,0.95), rgba(17,17,16,0));
+    padding:22px 0 40px;
+  }
+  nav .wrap{ display:flex; align-items:center; justify-content:space-between; }
+  .brand{ display:flex; align-items:center; gap:10px; font-family:'Special Elite', monospace; font-size:17px; }
+  .brand-mark{
+    width:30px;height:30px;
+    border:1px solid var(--wax-bright);
+    border-radius:50%;
+    display:flex; align-items:center; justify-content:center;
+    color:var(--wax-bright); font-size:13px;
+    font-family:'IBM Plex Mono',monospace;
+  }
+  .navlinks{ display:flex; gap:34px; font-size:12.5px; font-family:'IBM Plex Mono',monospace; letter-spacing:0.04em; }
+  .navlinks a{ color:var(--paper-dim); transition:color .2s; }
+  .navlinks a:hover{ color:var(--steel); }
+  .nav-cta{
+    border:1px solid var(--wax-bright);
+    color:var(--wax-bright);
+    padding:9px 18px;
+    font-size:11.5px;
+    letter-spacing:0.1em;
+    text-transform:uppercase;
+    font-family:'IBM Plex Mono',monospace;
+  }
+  @media(max-width:820px){ .navlinks{display:none;} }
+
+  /* ---------- HERO ---------- */
+  .hero{
+    min-height:100vh;
+    display:flex; align-items:center;
+    padding-top:140px;
+    background:
+      radial-gradient(ellipse 800px 460px at 85% 10%, rgba(165,40,58,0.14), transparent 60%),
+      radial-gradient(ellipse 700px 500px at 0% 40%, rgba(124,147,163,0.10), transparent 55%),
+      var(--ink);
+  }
+  .hero-grid{ display:grid; grid-template-columns:1.05fr 0.95fr; gap:60px; align-items:center; }
+  @media(max-width:900px){ .hero-grid{ grid-template-columns:1fr; } }
+
+  .hero h1{
+    font-size:clamp(38px, 5.4vw, 64px);
+    line-height:1.18;
+    margin:22px 0 22px;
+  }
+  .hero p.lede{ font-size:17px; color:var(--paper-dim); max-width:540px; margin-bottom:36px; font-family:'Source Serif 4',serif; }
+  .hero-ctas{ display:flex; gap:16px; flex-wrap:wrap; margin-bottom:44px; }
+  .btn-primary{
+    background:var(--wax-bright);
+    color:#1a0507;
+    padding:15px 28px;
+    font-weight:600;
+    font-size:14px;
+    font-family:'IBM Plex Mono',monospace;
+    display:inline-flex; align-items:center; gap:10px;
+    transition:transform .2s, background .2s;
+  }
+  .btn-primary:hover{ background:#d9495c; transform:translateY(-1px); }
+  .btn-ghost{
+    border:1px solid var(--line);
+    color:var(--paper);
+    padding:15px 28px;
+    font-size:14px;
+    font-family:'IBM Plex Mono',monospace;
+    transition:border-color .2s, color .2s;
+  }
+  .btn-ghost:hover{ border-color:var(--steel); color:var(--steel); }
+
+  .hero-stats{ display:flex; gap:40px; }
+  .hero-stat .num{ font-family:'IBM Plex Mono',monospace; font-size:22px; color:var(--steel); }
+  .hero-stat .lab{ font-size:11px; letter-spacing:0.06em; text-transform:uppercase; color:var(--paper-dim); margin-top:4px; font-family:'IBM Plex Mono',monospace; }
+
+  /* dossier card */
+  .dossier{
+    background:var(--paper);
+    color:var(--ink);
+    padding:32px 30px;
+    border:1px solid var(--paper-dim);
+    position:relative;
+    box-shadow:0 30px 70px rgba(0,0,0,0.55);
+  }
+  .dossier .top-row{ display:flex; justify-content:space-between; align-items:center; margin-bottom:18px; }
+  .dossier .case-no{ font-family:'IBM Plex Mono',monospace; font-size:11px; letter-spacing:0.1em; color:#5a5448; }
+  .dossier h3{ font-family:'Special Elite',monospace; font-size:24px; color:var(--ink); margin-bottom:4px; }
+  .dossier .sub{ font-family:'IBM Plex Mono',monospace; font-size:11px; color:var(--wax); margin-bottom:18px; }
+  .dossier hr{ border:none; border-top:1px dashed #b9b19c; margin:16px 0; }
+  .field-row{ display:flex; justify-content:space-between; font-family:'IBM Plex Mono',monospace; font-size:12px; padding:6px 0; }
+  .field-row .val{ font-weight:600; }
+  .field-row .val.blackbar{
+    background:var(--redact); color:var(--redact); border-radius:2px; padding:2px 8px;
+  }
+  .dossier .stamp-corner{ position:absolute; bottom:20px; right:24px; transform:rotate(-8deg); }
+
+  /* ---------- SIGNATURE: BLIND REVEAL ---------- */
+  .reveal-section{ background:var(--ink-2); border-top:1px solid var(--line); border-bottom:1px solid var(--line); }
+  .reveal-visual{
+    background:var(--ink);
+    border:1px solid var(--line);
+    padding:50px 40px 40px;
+  }
+  .reveal-row{ display:flex; align-items:center; gap:24px; margin-bottom:16px; flex-wrap:wrap; }
+  .reveal-row .order{
+    font-family:'IBM Plex Mono',monospace;
+    font-size:12px;
+    border:1px solid var(--line);
+    padding:8px 14px;
+    color:var(--paper-dim);
+    min-width:210px;
+  }
+  .reveal-row .order .bar{ background:var(--redact); color:var(--redact); padding:1px 6px; border-radius:2px; margin-left:6px;}
+  .reveal-row .order.revealed .bar{ background:transparent; color:var(--steel); }
+  .countdown-track{
+    flex:1;
+    height:2px;
+    background:var(--line);
+    position:relative;
+    min-width:120px;
+  }
+  .countdown-fill{
+    position:absolute; left:0; top:0; height:100%;
+    background:var(--wax-bright);
+    animation:fillbar 5.8s linear infinite;
+  }
+  .countdown-fill.d2{ animation-delay:1.9s; background:var(--steel); }
+  .countdown-fill.d3{ animation-delay:3.8s; }
+  @keyframes fillbar{
+    0%{ width:0%; }
+    75%{ width:100%; }
+    88%{ width:100%; opacity:0.3; }
+    100%{ width:100%; opacity:0; }
+  }
+  .clock{ font-family:'IBM Plex Mono',monospace; font-size:12px; color:var(--wax-bright); width:70px; text-align:right; }
+  .ticker{
+    margin-top:36px; border-top:1px solid var(--line); padding-top:20px;
+    font-family:'IBM Plex Mono',monospace; font-size:12px; color:var(--paper-dim);
+    display:flex; flex-wrap:wrap; gap:24px;
+  }
+  .ticker b{ color:var(--steel); font-weight:600; }
+
+  /* ---------- SECTION HEADS ---------- */
+  .section-head{ max-width:640px; margin-bottom:64px; }
+  .section-head h2{ font-size:clamp(26px,3.8vw,38px); line-height:1.25; }
+  .section-head p{ color:var(--paper-dim); margin-top:16px; font-size:15.5px; font-family:'Source Serif 4',serif; }
+
+  /* ---------- MECHANIC ---------- */
+  .mech-grid{ display:grid; grid-template-columns:repeat(3,1fr); gap:1px; background:var(--line); border:1px solid var(--line); }
+  @media(max-width:820px){ .mech-grid{ grid-template-columns:1fr; } }
+  .mech-card{ background:var(--ink); padding:36px 30px; }
+  .mech-card .tag{ font-family:'IBM Plex Mono',monospace; font-size:11px; letter-spacing:0.1em; text-transform:uppercase; color:var(--wax-bright); margin-bottom:14px; }
+  .mech-card h3{ font-size:19px; margin-bottom:12px; font-family:'Special Elite',monospace; }
+  .mech-card p{ font-size:14.5px; color:var(--paper-dim); font-family:'Source Serif 4',serif; }
+
+  /* ---------- TOKENOMICS ---------- */
+  .tok-wrap{ display:grid; grid-template-columns:1fr 1fr; gap:60px; align-items:start; }
+  @media(max-width:900px){ .tok-wrap{ grid-template-columns:1fr; } }
+  .bar-row{ margin-bottom:22px; }
+  .bar-top{ display:flex; justify-content:space-between; font-family:'IBM Plex Mono',monospace; font-size:12.5px; margin-bottom:8px; }
+  .bar-top .pct{ color:var(--wax-bright); }
+  .bar-track{ height:8px; background:rgba(233,228,216,0.08); }
+  .bar-fill{ height:100%; background:var(--steel); }
+  .bar-fill.wax{ background:var(--wax-bright); }
+  .bar-fill.brass{ background:var(--brass); }
+
+  .flow-box{ border:1px solid var(--line); padding:30px; background:var(--ink-2); }
+  .flow-box h3{ font-size:15px; margin-bottom:18px; font-family:'IBM Plex Mono',monospace; letter-spacing:0.04em; color:var(--paper); text-transform:uppercase; }
+  .flow-step{ display:flex; gap:14px; margin-bottom:18px; }
+  .flow-step .n{ font-family:'IBM Plex Mono',monospace; color:var(--wax-bright); font-size:13px; flex-shrink:0; width:20px; }
+  .flow-step p{ font-size:13.5px; color:var(--paper-dim); font-family:'Source Serif 4',serif; }
+  .flow-step strong{ color:var(--paper); font-weight:600; }
+
+  /* ---------- CASE FILE / ROADMAP ---------- */
+  .files{ border-left:1px solid var(--line); margin-left:8px; }
+  .file{ position:relative; padding:0 0 56px 40px; }
+  .file:last-child{ padding-bottom:0; }
+  .file::before{
+    content:""; position:absolute; left:-6px; top:4px;
+    width:11px; height:11px; border-radius:50%;
+    background:var(--ink); border:2px solid var(--wax-bright);
+  }
+  .file.done::before{ background:var(--wax-bright); }
+  .file .fl-eyebrow{ font-family:'IBM Plex Mono',monospace; font-size:11px; color:var(--steel); letter-spacing:0.1em; text-transform:uppercase; margin-bottom:8px; }
+  .file h3{ font-size:20px; margin-bottom:10px; font-family:'Special Elite',monospace; }
+  .file p{ color:var(--paper-dim); font-size:14.5px; max-width:560px; font-family:'Source Serif 4',serif; }
+
+  /* ---------- COMMUNITY ---------- */
+  .community{
+    background:linear-gradient(135deg, #241012 0%, var(--ink-2) 100%);
+    border:1px solid var(--line);
+    padding:70px 60px;
+    text-align:center;
+  }
+  @media(max-width:700px){ .community{ padding:50px 24px; } }
+  .community h2{ font-size:clamp(24px,3.6vw,34px); margin-bottom:16px; }
+  .community p{ color:var(--paper-dim); max-width:520px; margin:0 auto 34px; font-family:'Source Serif 4',serif; }
+  .social-row{ display:flex; gap:14px; justify-content:center; flex-wrap:wrap; }
+  .social-row a{ border:1px solid var(--line); padding:12px 22px; font-size:12.5px; font-family:'IBM Plex Mono',monospace; transition:border-color .2s,color .2s; }
+  .social-row a:hover{ border-color:var(--wax-bright); color:var(--wax-bright); }
+
+  /* ---------- FOOTER ---------- */
+  footer{ border-top:1px solid var(--line); padding:50px 0 40px; }
+  .foot-grid{ display:flex; justify-content:space-between; flex-wrap:wrap; gap:24px; margin-bottom:30px; }
+  .foot-note{ font-size:12px; color:var(--paper-dim); line-height:1.7; max-width:760px; font-family:'IBM Plex Mono',monospace; }
+  .foot-note b{ color:var(--paper); }
+  .foot-bottom{ font-family:'IBM Plex Mono',monospace; font-size:11px; color:var(--paper-dim); opacity:0.7; }
+</style>
+</head>
+<body>
+
+<nav>
+  <div class="wrap">
+    <div class="brand"><span class="brand-mark">29</span> Blind&nbsp;29</div>
+    <div class="navlinks">
+      <a href="#case">The Case</a>
+      <a href="#mechanic">The Protocol</a>
+      <a href="#tokenomics">Tokenomics</a>
+      <a href="#files">Case Files</a>
+    </div>
+    <a href="#community" class="nav-cta">Open the file</a>
+  </div>
+</nav>
+
+<header class="hero">
+  <div class="wrap hero-grid">
+    <div>
+      <span class="stamp">Concept — Unfiled</span>
+      <h1>Every trade goes<br>in blind. Nobody sees<br>the order until block <span style="color:var(--wax-bright)">29</span>.</h1>
+      <p class="lede">Blind 29 ($B29) is a concept for a token whose trades are sealed on submission — size, price, and direction hidden — then opened together in one batch, 29 blocks later, at a single fair price. No front-running. No watching the mempool. Nobody sees you coming, because nobody sees anyone.</p>
+      <div class="hero-ctas">
+        <a href="#mechanic" class="btn-primary">Open the case file →</a>
+        <a href="#tokenomics" class="btn-ghost">Read the tokenomics</a>
+      </div>
+      <div class="hero-stats">
+        <div class="hero-stat"><div class="num">29</div><div class="lab">blocks, sealed</div></div>
+        <div class="hero-stat"><div class="num">0.0%</div><div class="lab">live on any exchange</div></div>
+        <div class="hero-stat"><div class="num">1</div><div class="lab">clearing price per batch</div></div>
+      </div>
+    </div>
+
+    <div class="dossier">
+      <div class="top-row">
+        <span class="case-no">CASE FILE NO. B29-001</span>
+        <span class="case-no">STATUS: SEALED</span>
+      </div>
+      <h3>$B29 — Blind Ledger</h3>
+      <div class="sub">EYES ONLY UNTIL REVEAL</div>
+      <hr>
+      <div class="field-row"><span>Order direction</span><span class="val blackbar">████████</span></div>
+      <div class="field-row"><span>Order size</span><span class="val blackbar">████</span></div>
+      <div class="field-row"><span>Wallet</span><span class="val blackbar">██████████</span></div>
+      <div class="field-row"><span>Blocks to reveal</span><span class="val" style="color:var(--wax)">29</span></div>
+      <hr>
+      <div class="field-row"><span>Clearing method</span><span class="val">Single batch price</span></div>
+      <div class="stamp-corner"><span class="stamp">Simulation only</span></div>
+    </div>
+  </div>
+</header>
+
+<section class="reveal-section" id="mechanic">
+  <div class="wrap">
+    <div class="eyebrow">The signature mechanism</div>
+    <div class="section-head" style="margin-bottom:44px;">
+      <h2>Watch the seal break.</h2>
+      <p>Three orders enter blind, each redacted until its 29-block window closes — then they reveal together and settle at one shared price, so being first in line buys nothing.</p>
+    </div>
+
+    <div class="reveal-visual">
+      <div class="reveal-row">
+        <div class="order" id="o1">Order <span class="mono">#A17</span> <span class="bar">SEALED</span></div>
+        <div class="countdown-track"><div class="countdown-fill d1"></div></div>
+        <div class="clock">29 → 0</div>
+      </div>
+      <div class="reveal-row">
+        <div class="order" id="o2">Order <span class="mono">#A18</span> <span class="bar">SEALED</span></div>
+        <div class="countdown-track"><div class="countdown-fill d2"></div></div>
+        <div class="clock">29 → 0</div>
+      </div>
+      <div class="reveal-row">
+        <div class="order" id="o3">Order <span class="mono">#A19</span> <span class="bar">SEALED</span></div>
+        <div class="countdown-track"><div class="countdown-fill d3"></div></div>
+        <div class="clock">29 → 0</div>
+      </div>
+      <div class="ticker">
+        <div><b>01</b> Orders submit encrypted — size and side hidden from everyone, including validators.</div>
+        <div><b>02</b> After 29 blocks, all orders in the window reveal and settle simultaneously.</div>
+        <div><b>03</b> Every trade in the batch clears at the same price — first-in-line has no edge.</div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section id="case">
+  <div class="wrap">
+    <div class="eyebrow">The case, retold</div>
+    <div class="section-head">
+      <h2>Every market has a snitch.</h2>
+      <p>The old problem: the moment your order hits the mempool, a bot reads it and trades ahead of you. The idea here: don't let anyone read it. Seal every order, open them all at once, and the advantage disappears with the visibility.</p>
+    </div>
+  </div>
+</section>
+
+<section id="tokenomics">
+  <div class="wrap">
+    <div class="section-head">
+      <div class="eyebrow">Tokenomics — draft allocation</div>
+      <h2>A supply built around the seal.</h2>
+      <p>Illustrative split for the concept — final numbers would be set by whichever team and community take this forward.</p>
+    </div>
+
+    <div class="tok-wrap">
+      <div>
+        <div class="bar-row">
+          <div class="bar-top"><span>Reveal rewards pool</span><span class="pct">35%</span></div>
+          <div class="bar-track"><div class="bar-fill wax" style="width:35%"></div></div>
+        </div>
+        <div class="bar-row">
+          <div class="bar-top"><span>Liquidity</span><span class="pct">25%</span></div>
+          <div class="bar-track"><div class="bar-fill" style="width:25%"></div></div>
+        </div>
+        <div class="bar-row">
+          <div class="bar-top"><span>Protocol treasury</span><span class="pct">18%</span></div>
+          <div class="bar-track"><div class="bar-fill brass" style="width:18%"></div></div>
+        </div>
+        <div class="bar-row">
+          <div class="bar-top"><span>Team, vested</span><span class="pct">14%</span></div>
+          <div class="bar-track"><div class="bar-fill" style="width:14%"></div></div>
+        </div>
+        <div class="bar-row">
+          <div class="bar-top"><span>Reserve</span><span class="pct">8%</span></div>
+          <div class="bar-track"><div class="bar-fill wax" style="width:8%"></div></div>
+        </div>
+      </div>
+
+      <div class="flow-box">
+        <h3>What happens on a broken seal</h3>
+        <div class="flow-step"><div class="n">01</div><p>A <strong>2.9%</strong> fee applies to any attempt to cancel or resubmit an order to dodge the queue — treated as tampering with the file.</p></div>
+        <div class="flow-step"><div class="n">02</div><p>Tampering fees route to the <strong>reveal rewards pool</strong>, paid out to wallets that held their sealed order to term.</p></div>
+        <div class="flow-step"><div class="n">03</div><p>Batches with zero tampering carry a small bonus, funded from the protocol treasury, split across that batch's participants.</p></div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section id="files">
+  <div class="wrap">
+    <div class="section-head">
+      <div class="eyebrow">Case files</div>
+      <h2>The investigation, in order.</h2>
+      <p>A concept roadmap — filed as case entries, since each one closes a specific gap in how blind settlement would actually work.</p>
+    </div>
+
+    <div class="files">
+      <div class="file done">
+        <div class="fl-eyebrow">File 001</div>
+        <h3>The seal is designed</h3>
+        <p>Define the commit-reveal order format, the 29-block window, and the batch clearing-price model.</p>
+      </div>
+      <div class="file">
+        <div class="fl-eyebrow">File 002</div>
+        <h3>The reveal is built</h3>
+        <p>Prototype the encrypted commit contract and the batch settlement logic, tested against simulated order flow.</p>
+      </div>
+      <div class="file">
+        <div class="fl-eyebrow">File 003</div>
+        <h3>The file goes public</h3>
+        <p>Community formation, independent audits, and a testnet run of the blind-reveal batches.</p>
+      </div>
+      <div class="file">
+        <div class="fl-eyebrow">File 004</div>
+        <h3>Case closed, protocol opens</h3>
+        <p>Mainnet launch consideration, exchange conversations, and governance handed to the community.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section id="community">
+  <div class="wrap">
+    <div class="community">
+      <h2>This file isn't closed yet.</h2>
+      <p>Blind 29 is a concept — a blind-settlement mechanic worth building. If it resonates, the next step is a real team, a real audit, and a real community to shape it.</p>
+      <div class="social-row">
+        <a href="#">Discuss the concept</a>
+        <a href="#">Read the full writeup</a>
+        <a href="#">Suggest a mechanic</a>
+      </div>
+    </div>
+  </div>
+</section>
+
+<footer>
+  <div class="wrap">
+    <div class="foot-grid">
+      <div class="brand"><span class="brand-mark">29</span> Blind&nbsp;29 ($B29)</div>
+      <div class="foot-bottom">Case File B29 — concept build</div>
+    </div>
+    <p class="foot-note"><b>Ini adalah konsep kreatif, bukan produk yang sudah berjalan.</b> $B29 belum diterbitkan di jaringan blockchain manapun, belum terdaftar di bursa manapun, dan tidak berafiliasi dengan Robinhood Markets, Inc. Halaman ini bukan nasihat keuangan maupun ajakan investasi. Sebelum membangun atau berinvestasi pada proyek kripto apa pun, lakukan riset independen (DYOR) dan pertimbangkan risiko kehilangan seluruh dana.</p>
+  </div>
+</footer>
+
+</body>
+</html>
